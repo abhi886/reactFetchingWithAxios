@@ -22,6 +22,19 @@ function App() {
         setError(err.message);
       });
   }
+
+  function createUser() {
+    const originalUsers = users;
+    const newUser = { id: 0, name: "abhishekh" };
+    setUsers([newUser, ...users]);
+    axios
+      .post("https://jsonplaceholder.typicode.com/users/", newUser)
+      .then(({ data: savedUser }) => setUsers([savedUser, ...users]))
+      .catch((err) => {
+        setUsers(originalUsers);
+        setError(err.message);
+      });
+  }
   useEffect(() => {
     const controller = new AbortController();
     setisLoading(true);
@@ -44,6 +57,7 @@ function App() {
     <>
       {error && <p>{error}</p>}
       {isLoading && <p>Loading...</p>}
+      <button onClick={() => createUser()}>Add</button>
       <ul>
         {users.map((user) => (
           <li key={user.id}>
