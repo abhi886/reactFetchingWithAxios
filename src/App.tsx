@@ -7,15 +7,21 @@ interface User {
 }
 function App() {
   const [data, setData] = useState<User[]>([]);
+  const [error, setError] = useState("");
   useEffect(() => {
     axios
       .get<User[]>("https://jsonplaceholder.typicode.com/users")
       .then(({ data }) => setData(data))
-      .catch((err) => console.log(err));
+      .catch((err) => setError(err.message));
   }, []);
   return (
     <>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+      {error && <p>{error}</p>}
+      <ul>
+        {data.map((d) => (
+          <li key={d.id}>{d.name}</li>
+        ))}
+      </ul>
     </>
   );
 }
