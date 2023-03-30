@@ -6,9 +6,22 @@ interface User {
   name: string;
 }
 function App() {
-  const [data, setData] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setisLoading] = useState(false);
+
+  function deleteUser(user: User) {
+    let originalUsers = users;
+    setUsers(users.filter((data) => data.id !== user.id));
+    // console.log(newUser)
+    axios
+      .delete(`https://jsonplaceholder.typicode.com/users/${user.id}`)
+
+      .catch((err) => {
+        setUsers(originalUsers);
+        setError(err.message);
+      });
+  }
   useEffect(() => {
     const controller = new AbortController();
     setisLoading(true);
@@ -18,7 +31,7 @@ function App() {
       })
       .then(({ data }) => {
         setisLoading(false);
-        setData(data);
+        setUsers(data);
       })
       .catch((err) => {
         if (err instanceof CanceledError) return;
@@ -32,8 +45,13 @@ function App() {
       {error && <p>{error}</p>}
       {isLoading && <p>Loading...</p>}
       <ul>
-        {data.map((d) => (
-          <li key={d.id}>{d.name}</li>
+        {users.map((user) => (
+          <li key={user.id}>
+            {user.name}{" "}
+            <button type='button' onClick={() => deleteUser(user)}>
+              Delete
+            </button>
+          </li>
         ))}
       </ul>
     </>
