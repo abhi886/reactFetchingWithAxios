@@ -9,8 +9,8 @@ function App() {
   const [data, setData] = useState<User[]>([]);
   useEffect(() => {
     axios
-      .get("https://jsonplaceholder.typicode.com/users")
-      .then(({ data }) => setData(data[0].id))
+      .get<User[]>("https://jsonplaceholder.typicode.com/users")
+      .then(({ data }) => setData(data))
       .catch((err) => console.log(err));
   }, []);
   return (
