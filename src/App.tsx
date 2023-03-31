@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import apiClient, { CanceledError } from "./services/api-client";
-interface User {
-  id: number;
-  name: string;
-}
+import { CanceledError } from "./services/api-client";
+import userService, { User } from "./services/user-service";
+
 function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState("");
@@ -12,8 +10,7 @@ function App() {
   function deleteUser(user: User) {
     let originalUsers = users;
     setUsers(users.filter((data) => data.id !== user.id));
-    // console.log(newUser)
-    apiClient.delete("/users/" + user.id).catch((err) => {
+    userService.deleteUser(user.id).catch((err) => {
       setUsers(originalUsers);
       setError(err.message);
     });
@@ -23,7 +20,7 @@ function App() {
     const originalUser = [...users];
     let updatedUser = { ...user, name: user.name + "!" };
     setUsers(users.map((u) => (user.id === u.id ? updatedUser : u)));
-    apiClient.patch("/users/" + user.id, updatedUser).catch((err) => {
+    userService.updateUser(updatedUser).catch((err) => {
       setError(err.message);
       setUsers(originalUser);
     });
@@ -33,8 +30,8 @@ function App() {
     const originalUsers = users;
     const newUser = { id: 0, name: "abhishekh" };
     setUsers([newUser, ...users]);
-    apiClient
-      .post("/users/", newUser)
+    userService
+      .createUser(newUser)
       .then(({ data: savedUser }) => setUsers([savedUser, ...users]))
       .catch((err) => {
         setUsers(originalUsers);
@@ -42,12 +39,9 @@ function App() {
       });
   }
   useEffect(() => {
-    const controller = new AbortController();
     setisLoading(true);
-    apiClient
-      .get<User[]>("/users", {
-        signal: controller.signal,
-      })
+    const { request, cancel } = userService.getAllUsers();
+    request
       .then(({ data }) => {
         setisLoading(false);
         setUsers(data);
@@ -57,7 +51,7 @@ function App() {
         setError(err.message);
         setisLoading(false);
       });
-    return () => controller.abort();
+    return () => cancel();
   }, []);
   return (
     <>
